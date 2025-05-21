@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #E5E4E2;
+      color:  #900020;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      background-color: #900020;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      background-image: url('back.jpg');
+      background-size: cover;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: scale(1.1);
+    }
+    .card.flipped {
+      background-size: cover;
+    }
+    #finish-container {
+  display: none;
+  margin-top: 30px;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+    #finish-container video {
+      max-width: 300px;
+      border-radius: 10px;
+    }
+    
+    button {
+      margin-top: 20px;
+      padding: 20px 50px;
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      background:  #900020;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 15px #00000033;
+      transition: all 0.3s ease;
+    }
+    .button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 20px #0000004d;
+    }
+   
+  </style>
+</head>
+<body>
+  <h1>Memory Game 💖</h1>
+  <div class="grid" id="grid"></div>
+
+  <div id="finish-container">
+    <h1>❤️</h1>
+    <video id="congratsVideo" src="v1.MOV" autoplay loop muted></video>
+    <button id="next-button">-></button>
+  </div>
+
+  <script>
+    const images = [
+      '1.jpg', '2.jpg', '3.jpg', 
+      '2.jpg', '1.jpg', '4.jpg', 
+      '3.jpg', '4.jpg', '5.jpg',
+      '6.jpg', '5.jpg', '6.jpg'
+    ];
+
+    let firstCard = null;
+    let lock = false;
+    let matchedPairs = 0;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function createCard(image) {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.image = image;
+      card.addEventListener('click', flipCard);
+      return card;
+    }
+
+    function flipCard() {
+      if (lock || this === firstCard || this.classList.contains('flipped')) return;
+      this.classList.add('flipped');
+      this.style.backgroundImage = `url(${this.dataset.image})`;
+
+      if (!firstCard) {
+        firstCard = this;
+      } else {
+        if (firstCard.dataset.image === this.dataset.image) {
+          matchedPairs++;
+          firstCard = null;
+
+          if (matchedPairs === Math.floor(images.length / 2)) {
+            setTimeout(showFinish, 500); // чуть быстрее появляется
+          }
+
+        } else {
+          lock = true;
+          setTimeout(() => {
+            this.classList.remove('flipped');
+            this.style.backgroundImage = 'url(back.jpg)';
+            firstCard.classList.remove('flipped');
+            firstCard.style.backgroundImage = 'url(back.jpg)';
+            firstCard = null;
+            lock = false;
+          }, 1000);
+        }
+      }
+    }
+
+    function showFinish() {
+      const finishContainer = document.getElementById('finish-container');
+      const video = document.getElementById('congratsVideo');
+      finishContainer.style.display = 'flex';
+      video.play();
+    }
+
+    document.getElementById('next-button').addEventListener('click', () => {
+      window.location.href = 'cake.html';
+    });
+
+    const grid = document.getElementById('grid');
+    shuffle(images);
+    images.forEach(img => {
+      grid.appendChild(createCard(img));
+    });
+  </script>
+</body>
+</html>
